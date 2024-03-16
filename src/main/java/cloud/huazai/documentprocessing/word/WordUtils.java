@@ -21,16 +21,6 @@ import java.net.URLConnection;
  */
 public class WordUtils {
 
-	// public static void  download(XWPFDocument document, HttpServletResponse response, String wordName)throws Exception{
-	// 	String attachmentPath = wordName + ".docx";
-	// 	String fileNameURL = URLEncoder.encode(attachmentPath, "UTF-8");
-	// 	response.setContentType("application/octet-stream;charset=UTF-8");
-	// 	response.setHeader("Content-disposition", "attachment;filename=" + fileNameURL + ";" + "filename*=" +fileNameURL);
-	// 	response.setCharacterEncoding("UTF-8");
-	//
-	// 	document.write(response.getOutputStream());
-	// }
-
 
 	public static void demo(XWPFDocument document,String imgUrl){
 
