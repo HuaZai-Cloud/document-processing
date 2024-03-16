@@ -30,6 +30,8 @@ public class WordUtilsTest {
 		try {
 			FileOutputStream fileOutputStream = new FileOutputStream(outPath);
 			document.write(fileOutputStream);
+
+			System.out.println("fileOutputStream = " + fileOutputStream);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
