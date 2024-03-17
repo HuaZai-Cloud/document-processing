@@ -13,15 +13,13 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
 /**
  * WordUtils
  *
  * @author Di Wu
  * @since 2024-03-11
  */
-public class WordUtils {
-
+public class WordUtils  {
 	private static final String pictureName = "picture";
 
 	public static void insertPicture(XWPFDocument document, String pictureUrl, double width, double height) {
@@ -44,13 +42,13 @@ public class WordUtils {
 	 * @param alignment       对齐方式
 	 */
 	public static void insertPicture(XWPFDocument document, String pictureUrl, double width, double height, boolean isAddConnection, ParagraphAlignment alignment) {
-		 try {
-			 URL url = new URL(pictureUrl);
-			 URLConnection urlConn = url.openConnection();
-			 InputStream inputStream = urlConn.getInputStream();
+		try {
+			URL url = new URL(pictureUrl);
+			URLConnection urlConn = url.openConnection();
+			InputStream inputStream = urlConn.getInputStream();
 			XWPFParagraph paragraph = document.createParagraph();
 			XWPFRun run = paragraph.createRun();
-			if (inputStream !=null) {
+			if (inputStream != null) {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
 				PictureType pictureType = PictureType.valueOf(FileMagic.valueOf(bufferedInputStream));
@@ -63,25 +61,23 @@ public class WordUtils {
 				if (isAddConnection) {
 
 					String relationshipId = document.getPackagePart().addExternalRelationship(pictureUrl, XWPFRelation.HYPERLINK.getRelation()).getId();
-					 if (run.getCTR().getDrawingList() != null && !run.getCTR().getDrawingList().isEmpty()) {
+					if (run.getCTR().getDrawingList() != null && !run.getCTR().getDrawingList().isEmpty()) {
 						CTDrawing ctDrawing = run.getCTR().getDrawingList().get(0);
-						 if (ctDrawing.getInlineList() != null && !ctDrawing.getInlineList().isEmpty()) {
-							 CTInline ctInline = ctDrawing.getInlineList().get(0);
-							 CTNonVisualDrawingProps docPr = ctInline.getDocPr();
-							 if (docPr != null) {
+						if (ctDrawing.getInlineList() != null && !ctDrawing.getInlineList().isEmpty()) {
+							CTInline ctInline = ctDrawing.getInlineList().get(0);
+							CTNonVisualDrawingProps docPr = ctInline.getDocPr();
+							if (docPr != null) {
 								CTHyperlink linkClick = docPr.addNewHlinkClick();
 								linkClick.setId(relationshipId);
 							}
-						 }
-					 }
-				 }
-			 }
-		 } catch (Exception e) {
-			 throw new RuntimeException(e);
-		 }
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
-
-
 	/**
 	 * 插入图片
 	 *
@@ -92,26 +88,18 @@ public class WordUtils {
 	 * @param alignment          对齐方式
 	 */
 	public static void insertPicture(XWPFDocument document, InputStream pictureInputStream, double width, double height, ParagraphAlignment alignment) {
-
-		 try {
-
-			 XWPFParagraph paragraph = document.createParagraph();
-			 XWPFRun run = paragraph.createRun();
-
+		try {
+			XWPFParagraph paragraph = document.createParagraph();
+			XWPFRun run = paragraph.createRun();
 			if (null != pictureInputStream) {
-
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(pictureInputStream);
-
 				PictureType pictureType = PictureType.valueOf(FileMagic.valueOf(bufferedInputStream));
 				int format = pictureType.getOoxmlId();
 				paragraph.setAlignment(alignment);
-
 				run.addPicture(bufferedInputStream, format, pictureName, (int) Math.rint(width * Units.EMU_PER_CENTIMETER), (int) Math.rint(height * Units.EMU_PER_CENTIMETER));
-			 }
-		 } catch (Exception e) {
-			 throw new RuntimeException(e);
-		 }
-	 }
-
-
- }
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+}
