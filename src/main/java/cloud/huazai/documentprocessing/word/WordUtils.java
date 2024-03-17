@@ -22,16 +22,25 @@ import java.net.URLConnection;
  */
 public class WordUtils {
 
-	/**
-	 * 插入图片
-	 *
-	 * @param document 文档
-	 * @param pictureUrl 图片url
-	 * @param width 文档中图片宽度 cm
-	 * @param height 文档中图片高度 cm
-	 * @param isAddConnection 是否添加超链接
-	 * @param alignment 对齐方式
-	 */
+	public static void insertPicture(XWPFDocument document,String pictureUrl,double width, double height ){
+		insertPicture(document, pictureUrl,width,height,true,ParagraphAlignment.CENTER);
+	}
+
+	public static void insertPicture(XWPFDocument document,InputStream pictureInputStream,double width, double height){
+		insertPicture(document, pictureInputStream, width, height, ParagraphAlignment.CENTER);
+	}
+
+
+		/**
+		 * 插入图片
+		 *
+		 * @param document 文档
+		 * @param pictureUrl 图片url
+		 * @param width 文档中图片宽度 cm
+		 * @param height 文档中图片高度 cm
+		 * @param isAddConnection 是否添加超链接
+		 * @param alignment 对齐方式
+		 */
 	public static void insertPicture(XWPFDocument document,String pictureUrl,double width, double height ,boolean isAddConnection,ParagraphAlignment alignment){
 		try {
 			URL	url = new URL(pictureUrl);
@@ -105,6 +114,9 @@ public class WordUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
+
+
 
 
 
