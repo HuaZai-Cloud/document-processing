@@ -75,7 +75,15 @@ public class WordUtils {
 	}
 
 
-
+	/**
+	 * 插入图片
+	 *
+	 * @param document 文档
+	 * @param pictureInputStream 图片输入流
+	 * @param width 文档中图片宽度 cm
+	 * @param height 文档中图片高度 cm
+	 * @param alignment 对齐方式
+	 */
 	public static void insertPicture(XWPFDocument document,InputStream pictureInputStream,double width, double height ,ParagraphAlignment alignment){
 
 		try {
