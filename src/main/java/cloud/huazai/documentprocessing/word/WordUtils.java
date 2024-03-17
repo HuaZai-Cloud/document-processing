@@ -13,13 +13,14 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
 /**
  * WordUtils
  *
  * @author Di Wu
  * @since 2024-03-11
  */
-public class WordUtils  {
+public class WordUtils {
 	private static final String pictureName = "picture";
 
 	public static void insertPicture(XWPFDocument document, String pictureUrl, double width, double height) {
@@ -78,6 +79,7 @@ public class WordUtils  {
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
 	 * 插入图片
 	 *
