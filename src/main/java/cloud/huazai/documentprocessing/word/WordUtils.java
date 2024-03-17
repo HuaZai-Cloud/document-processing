@@ -1,9 +1,8 @@
 package cloud.huazai.documentprocessing.word;
 
 import cloud.huazai.tool.basic.lang.StringUtils;
-import jdk.internal.org.objectweb.asm.Handle;
+import cloud.huazai.tool.exception.BusinessException;
 import org.apache.poi.common.usermodel.PictureType;
-import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
@@ -19,7 +18,6 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -115,21 +113,19 @@ public class WordUtils {
 		}
 	}
 
-
-	public static void setHeading(XWPFDocument document,String headingName,int headingLevel,int fontSize,String fontColor, String fontName,double lineSpacing) {
+	public static void setParagraphStyle(XWPFDocument document, ParagraphStyleTypeEnum type, String paragraphStyleName, int headingLevel) {
 
 		XWPFStyles styles = document.createStyles();
 
 		//创建样式
 		CTStyle ctStyle = CTStyle.Factory.newInstance();
 
-
 		//设置id
-		ctStyle.setStyleId("Heading"+headingLevel);
-		// ctStyle.setStyleId(headingName);
-
-		headingNameToStyleIdMap.put(headingName, ctStyle.getStyleId());
-
+		if (type.equals(ParagraphStyleTypeEnum.HEADING)) {
+			ctStyle.setStyleId(type.getParagraphStyleName()+headingLevel);
+		}else{
+			ctStyle.setStyleId(type.getParagraphStyleName());
+		}
 
 		CTString styleName = CTString.Factory.newInstance();
 		styleName.setVal(ctStyle.getStyleId());
@@ -141,23 +137,51 @@ public class WordUtils {
 		// 数字越低在格式栏中越突出
 		ctStyle.setUiPriority(indentNumber);
 
-		CTOnOff onoffnull = CTOnOff.Factory.newInstance();
-		ctStyle.setUnhideWhenUsed(onoffnull);
+		CTOnOff onOff = CTOnOff.Factory.newInstance();
+		ctStyle.setUnhideWhenUsed(onOff);
 
 		// 样式将显示在“格式”栏中
-		ctStyle.setQFormat(onoffnull);
+		ctStyle.setQFormat(onOff);
 
 		// 样式定义给定级别的标题
 		if (headingLevel != 0) {
-			CTPPrGeneral ppr = CTPPrGeneral.Factory.newInstance();
+			CTPPrGeneral ppr = ctStyle.addNewPPr();
 			ppr.setOutlineLvl(indentNumber);
-			ctStyle.setPPr(ppr);
+		}
+		XWPFStyle style = new XWPFStyle(ctStyle);
+		styles.addStyle(style);
+
+		headingNameToStyleIdMap.put(paragraphStyleName, ctStyle.getStyleId());
+	}
+
+	public static void setParagraphStyle(XWPFDocument document, ParagraphStyleTypeEnum type, String paragraphStyleName, int headingLevel, int fontSize, String fontColor, String fontName, LineSpacingEnum lineSpacing) {
+
+		setParagraphStyle(document, type, paragraphStyleName, headingLevel);
+
+		setParagraphStyle(document, paragraphStyleName, fontSize, fontColor, fontName, lineSpacing);
+
+
+	}
+
+	public static void setParagraphStyle(XWPFDocument document, String paragraphStyleName, int fontSize, String fontColor, String fontName, LineSpacingEnum lineSpacing) {
+
+		setParagraphStyle(document, paragraphStyleName, fontSize, fontColor, fontName);
+
+		setSingleLineSpacing(document, paragraphStyleName, lineSpacing.getLineSpacing());
+
+	}
+
+	public static void setParagraphStyle(XWPFDocument document, String paragraphStyleName, int fontSize, String fontColor, String fontName) {
+
+		XWPFStyles styles = document.getStyles();
+
+		String styleId = headingNameToStyleIdMap.get(paragraphStyleName);
+		if (StringUtils.isBlank(styleId)) {
+			throw new BusinessException(StringUtils.format("Not set up {} Style",paragraphStyleName));
 		}
 
-		setSingleLineSpacing(ctStyle, lineSpacing);
-
-
-		XWPFStyle style = new XWPFStyle(ctStyle);
+		XWPFStyle style = styles.getStyle(styleId);
+		// CTStyle ctStyle = style.getCTStyle();
 
 		CTRPr rpr = CTRPr.Factory.newInstance();
 
@@ -171,7 +195,7 @@ public class WordUtils {
 
 		CTFonts fonts = rpr.addNewRFonts();
 		if (StringUtils.isNotBlank(fontName)) {
-			fontName = "微软雅黑";
+			fontName = "宋体";
 		}
 		fonts.setAscii(fontName);
 
@@ -181,84 +205,14 @@ public class WordUtils {
 		style.getCTStyle().setRPr(rpr);
 
 
-
-
-		style.setType(STStyleType.PARAGRAPH);
-
-
-
-
-		styles.addStyle(style);
 	}
+
 
 	public static byte[] hexToBytes(String hexString) {
 		HexBinaryAdapter adapter = new HexBinaryAdapter();
 		return adapter.unmarshal(hexString);
 	}
 
-
-
-	// int styleLevel
-	public static void setHeading(XWPFDocument document, String text, String style, String color, Integer fontAlignment,
-	                           Integer fontSize, Boolean bold, Integer changeLine, Boolean changePage,
-	                           int indentationFirstLine,double lineSpacing) {
-		XWPFParagraph paragraph = document.createParagraph();
-		paragraph.setIndentationFirstLine(indentationFirstLine);
-		//
-		paragraph.setFontAlignment(fontAlignment);
-		//标题样式
-		if (StringUtils.isNotBlank(style)) {
-			XWPFRun run = paragraph.createRun();
-			run.setText(text);
-			run.setFontSize(fontSize);
-			run.setBold(bold);
-			run.setFontFamily("宋体");
-			if (StringUtils.isNotBlank(color)) {
-				run.setColor(color);
-			}
-			setSingleLineSpacing(paragraph,lineSpacing);
-			paragraph.setStyle("Heading" + style); // 标题 2
-			// paragraph.setStyle("标题 " + style); // 标题 2
-			return;
-		}
-
-		XWPFRun run = paragraph.createRun();
-		if (StringUtils.isNotBlank(color)) {
-			run.setColor(color);
-		}
-		//字体
-		run.setFontSize(fontSize);
-		run.setBold(bold);
-		run.setText(text);
-		run.setFontFamily("宋体");
-		setSingleLineSpacing(paragraph,lineSpacing);
-		//换行
-		for (int i = 0; i < changeLine; i++) {
-			run.addCarriageReturn();
-		}
-		//换页
-		if (changePage) {
-			run.addBreak(BreakType.PAGE);
-		}
-	}
-
-
-
-	public static void setSingleLineSpacing(XWPFParagraph para, double lineSpacing) {
-
-		if (lineSpacing <= 0) {
-			lineSpacing = 1;
-		}
-
-		CTPPr ppr = para.getCTP().getPPr();
-		if (ppr == null) ppr = para.getCTP().addNewPPr();
-		CTSpacing spacing = ppr.isSetSpacing()? ppr.getSpacing() : ppr.addNewSpacing();
-		spacing.setAfter(BigInteger.valueOf(0));
-		spacing.setBefore(BigInteger.valueOf(0));
-		spacing.setLineRule(STLineSpacingRule.AUTO);
-		int line = (int) (24 * lineSpacing * 10);
-		spacing.setLine(BigInteger.valueOf(line));
-	}
 
 	public static void setSingleLineSpacing(CTStyle ctStyle, double lineSpacing) {
 
@@ -267,8 +221,10 @@ public class WordUtils {
 		}
 
 		CTPPrGeneral ppr = ctStyle.getPPr();
-		if (ppr == null) {ppr = ctStyle.addNewPPr();}
-		CTSpacing spacing = ppr.isSetSpacing()? ppr.getSpacing() : ppr.addNewSpacing();
+		if (ppr == null) {
+			ppr = ctStyle.addNewPPr();
+		}
+		CTSpacing spacing = ppr.isSetSpacing() ? ppr.getSpacing() : ppr.addNewSpacing();
 		spacing.setAfter(BigInteger.valueOf(0));
 		spacing.setBefore(BigInteger.valueOf(0));
 		spacing.setLineRule(STLineSpacingRule.AUTO);
@@ -276,9 +232,24 @@ public class WordUtils {
 		spacing.setLine(BigInteger.valueOf(line));
 	}
 
+	public static void setSingleLineSpacing(XWPFDocument document, String paragraphStyleName, double lineSpacing) {
 
-	public static void setText(XWPFDocument document, String text,
-	                            String styleId) {
+		XWPFStyles styles = document.getStyles();
+
+		String styleId = headingNameToStyleIdMap.get(paragraphStyleName);
+		if (StringUtils.isBlank(styleId)) {
+			throw new BusinessException(StringUtils.format("Not set up {} Style",paragraphStyleName));
+		}
+
+		XWPFStyle style = styles.getStyle(styleId);
+		CTStyle ctStyle = style.getCTStyle();
+
+		setSingleLineSpacing(ctStyle, lineSpacing);
+
+	}
+
+
+	public static void setText(XWPFDocument document, String text, String styleId) {
 		XWPFParagraph paragraph = document.createParagraph();
 		// paragraph.setIndentationFirstLine(indentationFirstLine);
 		//
@@ -294,8 +265,20 @@ public class WordUtils {
 		// run.setFontSize(fontSize);
 		// run.setBold(bold);
 		run.setText(text);
-		// run.setFontFamily("宋体");
-		// setSingleLineSpacing(paragraph,lineSpacing);
+
+	}
+
+
+	private static String getStyleIdOrDefaultParagraphStyle(XWPFDocument document, String paragraphStyleName) {
+
+		String styleId = headingNameToStyleIdMap.get(paragraphStyleName);
+		if (StringUtils.isBlank(styleId)) {
+			headingNameToStyleIdMap.put(paragraphStyleName, paragraphStyleName);
+			// setParagraphStyle(document,ParagraphStyleTypeEnum.HEADING,paragraphStyleName,headingNameToStyleIdMap.size()+1);
+			styleId = paragraphStyleName;
+
+		}
+		return styleId;
 
 	}
 
