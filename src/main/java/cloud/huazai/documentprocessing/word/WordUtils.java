@@ -22,36 +22,35 @@ import java.net.URLConnection;
  */
 public class WordUtils {
 
-	public static void insertPicture(XWPFDocument document,String pictureUrl,double width, double height ){
-		insertPicture(document, pictureUrl,width,height,true,ParagraphAlignment.CENTER);
+	private static final String pictureName = "picture";
+
+	public static void insertPicture(XWPFDocument document, String pictureUrl, double width, double height) {
+		insertPicture(document, pictureUrl, width, height, true, ParagraphAlignment.CENTER);
 	}
 
-	public static void insertPicture(XWPFDocument document,InputStream pictureInputStream,double width, double height){
+	public static void insertPicture(XWPFDocument document, InputStream pictureInputStream, double width, double height) {
 		insertPicture(document, pictureInputStream, width, height, ParagraphAlignment.CENTER);
 	}
 
 
-		/**
-		 * 插入图片
-		 *
-		 * @param document 文档
-		 * @param pictureUrl 图片url
-		 * @param width 文档中图片宽度 cm
-		 * @param height 文档中图片高度 cm
-		 * @param isAddConnection 是否添加超链接
-		 * @param alignment 对齐方式
-		 */
-	public static void insertPicture(XWPFDocument document,String pictureUrl,double width, double height ,boolean isAddConnection,ParagraphAlignment alignment){
-		try {
-			URL	url = new URL(pictureUrl);
-			URLConnection urlConn = url.openConnection();
-			InputStream inputStream = urlConn.getInputStream();
-
+	/**
+	 * 插入图片
+	 *
+	 * @param document        文档
+	 * @param pictureUrl      图片url
+	 * @param width           文档中图片宽度 cm
+	 * @param height          文档中图片高度 cm
+	 * @param isAddConnection 是否添加超链接
+	 * @param alignment       对齐方式
+	 */
+	public static void insertPicture(XWPFDocument document, String pictureUrl, double width, double height, boolean isAddConnection, ParagraphAlignment alignment) {
+		 try {
+			 URL url = new URL(pictureUrl);
+			 URLConnection urlConn = url.openConnection();
+			 InputStream inputStream = urlConn.getInputStream();
 			XWPFParagraph paragraph = document.createParagraph();
 			XWPFRun run = paragraph.createRun();
-
-			if (null != inputStream) {
-
+			if (inputStream !=null) {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
 				PictureType pictureType = PictureType.valueOf(FileMagic.valueOf(bufferedInputStream));
@@ -59,46 +58,45 @@ public class WordUtils {
 
 				paragraph.setAlignment(alignment);
 
-				run.addPicture(bufferedInputStream, format,"picture", (int) Math.rint(width * Units.EMU_PER_CENTIMETER),(int)Math.rint(height*Units.EMU_PER_CENTIMETER));
+				run.addPicture(bufferedInputStream, format, pictureName, (int) Math.rint(width * Units.EMU_PER_CENTIMETER), (int) Math.rint(height * Units.EMU_PER_CENTIMETER));
 
 				if (isAddConnection) {
 
 					String relationshipId = document.getPackagePart().addExternalRelationship(pictureUrl, XWPFRelation.HYPERLINK.getRelation()).getId();
-
-					if (run.getCTR().getDrawingList() != null && !run.getCTR().getDrawingList().isEmpty()) {
+					 if (run.getCTR().getDrawingList() != null && !run.getCTR().getDrawingList().isEmpty()) {
 						CTDrawing ctDrawing = run.getCTR().getDrawingList().get(0);
-						if (ctDrawing.getInlineList() != null && !ctDrawing.getInlineList().isEmpty()) {
-							CTInline ctInline = ctDrawing.getInlineList().get(0);
-							CTNonVisualDrawingProps docPr = ctInline.getDocPr();
-							if (docPr != null) {
+						 if (ctDrawing.getInlineList() != null && !ctDrawing.getInlineList().isEmpty()) {
+							 CTInline ctInline = ctDrawing.getInlineList().get(0);
+							 CTNonVisualDrawingProps docPr = ctInline.getDocPr();
+							 if (docPr != null) {
 								CTHyperlink linkClick = docPr.addNewHlinkClick();
 								linkClick.setId(relationshipId);
 							}
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+						 }
+					 }
+				 }
+			 }
+		 } catch (Exception e) {
+			 throw new RuntimeException(e);
+		 }
 	}
 
 
 	/**
 	 * 插入图片
 	 *
-	 * @param document 文档
+	 * @param document           文档
 	 * @param pictureInputStream 图片输入流
-	 * @param width 文档中图片宽度 cm
-	 * @param height 文档中图片高度 cm
-	 * @param alignment 对齐方式
+	 * @param width              文档中图片宽度 cm
+	 * @param height             文档中图片高度 cm
+	 * @param alignment          对齐方式
 	 */
-	public static void insertPicture(XWPFDocument document,InputStream pictureInputStream,double width, double height ,ParagraphAlignment alignment){
+	public static void insertPicture(XWPFDocument document, InputStream pictureInputStream, double width, double height, ParagraphAlignment alignment) {
 
-		try {
+		 try {
 
-			XWPFParagraph paragraph = document.createParagraph();
-			XWPFRun run = paragraph.createRun();
+			 XWPFParagraph paragraph = document.createParagraph();
+			 XWPFRun run = paragraph.createRun();
 
 			if (null != pictureInputStream) {
 
@@ -108,16 +106,12 @@ public class WordUtils {
 				int format = pictureType.getOoxmlId();
 				paragraph.setAlignment(alignment);
 
-				run.addPicture(bufferedInputStream, format,"picture", (int) Math.rint(width * Units.EMU_PER_CENTIMETER),(int)Math.rint(height*Units.EMU_PER_CENTIMETER));
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+				run.addPicture(bufferedInputStream, format, pictureName, (int) Math.rint(width * Units.EMU_PER_CENTIMETER), (int) Math.rint(height * Units.EMU_PER_CENTIMETER));
+			 }
+		 } catch (Exception e) {
+			 throw new RuntimeException(e);
+		 }
+	 }
 
 
-
-
-
-
-}
+ }
