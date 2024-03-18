@@ -269,14 +269,12 @@ public class WordUtils {
 	}
 
 
-	private static String getStyleIdOrDefaultParagraphStyle(XWPFDocument document, String paragraphStyleName) {
+	private static String getStyleIdOrDefaultParagraphStyle(String paragraphStyleName) {
 
 		String styleId = headingNameToStyleIdMap.get(paragraphStyleName);
 		if (StringUtils.isBlank(styleId)) {
 			headingNameToStyleIdMap.put(paragraphStyleName, paragraphStyleName);
-			// setParagraphStyle(document,ParagraphStyleTypeEnum.HEADING,paragraphStyleName,headingNameToStyleIdMap.size()+1);
 			styleId = paragraphStyleName;
-
 		}
 		return styleId;
 
